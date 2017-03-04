@@ -1,4 +1,4 @@
-package curcuit
+package circuit
 
 import (
 	"sync"

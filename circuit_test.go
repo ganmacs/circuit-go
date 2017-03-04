@@ -16,11 +16,13 @@ type fakeClock struct {
 	val time.Time
 }
 
-func (t fakeClock) Now() time.Time {
-	return t.val
+func (fc fakeClock) Now() time.Time {
+	return fc.val
 }
 
-var clockMock = fakeClock{}
+func NewFakeClock() fakeClock {
+	return fakeClock{val: time.Unix(0, 0)}
+}
 
 func TestCircuit(t *testing.T) {
 	cb := NewCircuitBreaker()
@@ -50,6 +52,8 @@ func TestCircuit(t *testing.T) {
 
 func TestCircuitBackToSucess(t *testing.T) {
 	cb := NewCircuitBreaker()
+	clock := NewFakeClock()
+	cb.Clock = &clock
 
 	cb.Run(failFun)
 	if cb.state != open {
@@ -62,8 +66,8 @@ func TestCircuitBackToSucess(t *testing.T) {
 	}
 
 	// occur timeout
-	clockMock.val = cb.startOpenTime.Add(cb.timeout + 1*time.Second)
-	cb.Clock = clockMock
+	oldStartIime := cb.startOpenTime
+	clock.val = oldStartIime.Add(cb.timeout + 1*time.Second)
 
 	cb.Run(sucessFun)
 	if cb.state != closed {
@@ -73,6 +77,8 @@ func TestCircuitBackToSucess(t *testing.T) {
 
 func TestCircuitFailAgain(t *testing.T) {
 	cb := NewCircuitBreaker()
+	clock := NewFakeClock()
+	cb.Clock = &clock
 
 	cb.Run(failFun)
 	if cb.state != open {
@@ -80,9 +86,7 @@ func TestCircuitFailAgain(t *testing.T) {
 	}
 
 	// occur timeout
-	clockMock.val = cb.startOpenTime.Add(cb.timeout + 1*time.Second)
-	cb.Clock = clockMock
-
+	clock.val = cb.startOpenTime.Add(cb.timeout + 1*time.Second)
 	oldstartTime := cb.startOpenTime
 
 	cb.Run(failFun)

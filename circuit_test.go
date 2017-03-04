@@ -70,3 +70,27 @@ func TestCircuitBackToSucess(t *testing.T) {
 		t.Errorf("should be closed")
 	}
 }
+
+func TestCircuitFailAgain(t *testing.T) {
+	cb := NewCircuitBreaker()
+
+	cb.Run(failFun)
+	if cb.state != open {
+		t.Errorf("should be open")
+	}
+
+	// occur timeout
+	clockMock.val = cb.startOpenTime.Add(cb.timeout + 1*time.Second)
+	cb.Clock = clockMock
+
+	oldstartTime := cb.startOpenTime
+
+	cb.Run(failFun)
+	if cb.state != open {
+		t.Errorf("should be open")
+	}
+
+	if oldstartTime == cb.startOpenTime {
+		t.Errorf("Set new startOpenTime when fail again")
+	}
+}

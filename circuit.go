@@ -11,6 +11,7 @@ const (
 )
 const (
 	DefaultTimeout = 60 * time.Second
+	DefaultRate    = 0.5
 )
 
 type Configs struct {
@@ -28,13 +29,14 @@ type CircuitBreaker struct {
 
 type operation func() error
 
-func NewCircuitBreaker(config Configs) *CircuitBreaker {
+func NewCircuitBreaker() *CircuitBreaker {
 	return &CircuitBreaker{
 		state:         closed,
 		step:          0,
 		bucket:        *NewBucket(),
 		timeout:       DefaultTimeout,
 		startOpenTime: time.Now(),
+		rate:          DefaultRate,
 	}
 }
 

@@ -82,7 +82,7 @@ func (cb *CircuitBreaker) Run(op operation) error {
 	}
 
 	if cb.state == open {
-		return nil // cb is open todo error type
+		return errors.New("CircuitBreaker is open")
 	}
 
 	err := op()

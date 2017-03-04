@@ -27,8 +27,12 @@ func TestCircuit(t *testing.T) {
 		t.Errorf("should be close")
 	}
 
-	cb.Run(failFun)
-	if cb.state != open {
-		t.Errorf("should be close")
+	err := cb.Run(failFun)
+	if err == nil {
+		t.Errorf("should be return error class")
+	}
+
+	if err.Error() == "CircuitBreaker is open" {
+		t.Errorf("unexpected error: %s", err.Error())
 	}
 }

@@ -74,7 +74,7 @@ func (cb *CircuitBreaker) Sucess() {
 }
 
 func (cb *CircuitBreaker) exceedThreshold() bool {
-	return cb.bucket.ConsecutiveRate() > cb.rate
+	return cb.bucket.Rate() > cb.rate
 }
 
 func (cb *CircuitBreaker) Fail() {

@@ -17,7 +17,7 @@ func NewBucket() *Bucket {
 	return &Bucket{}
 }
 
-func (b *Bucket) ConsecutiveRate() float64 {
+func (b *Bucket) Rate() float64 {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 

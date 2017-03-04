@@ -82,7 +82,7 @@ func (cb *CircuitBreaker) Fail() {
 	case halfopen:
 		cb.state = open
 		cb.bucket.Fail()
-		cb.startOpenTime = time.Now()
+		cb.startOpenTime = cb.Clock.Now()
 	case closed:
 		cb.bucket.Fail()
 		if cb.exceedThreshold() {

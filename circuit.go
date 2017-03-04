@@ -47,11 +47,11 @@ func (cb *CircuitBreaker) HalfOpen() {
 }
 
 func (cb *CircuitBreaker) Sucess() {
-	if cb.state == halfopen {
-		cb.state = closed
-		cb.bucket.Reset()
+	switch cb.state {
+	case halfopen:
 		cb.bucket.Sucess()
-	} else if cb.state == closed {
+		cb.state = closed
+	case closed:
 		cb.bucket.Sucess()
 	}
 }
@@ -61,14 +61,15 @@ func (cb *CircuitBreaker) exceedThreshold() bool {
 }
 
 func (cb *CircuitBreaker) Fail() {
-	if cb.state == halfopen {
+	switch cb.state {
+	case halfopen:
 		cb.state = open
 		cb.bucket.Fail()
 		cb.startOpenTime = time.Now()
-	} else if cb.state == closed {
+	case closed:
 		cb.bucket.Fail()
 		if cb.exceedThreshold() {
-			cb.state = closed
+			cb.state = open
 		}
 	}
 }

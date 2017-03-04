@@ -1,6 +1,7 @@
 package circuit
 
 import (
+	"errors"
 	"time"
 )
 
@@ -18,6 +19,10 @@ type Configs struct {
 	rate float64
 }
 
+type Clock interface {
+	Now() time.Time
+}
+
 type CircuitBreaker struct {
 	state         int
 	step          uint64
@@ -25,7 +30,16 @@ type CircuitBreaker struct {
 	timeout       time.Duration
 	startOpenTime time.Time
 	rate          float64
+	Clock         Clock
 }
+
+type RealClock struct{}
+
+func (t RealClock) Now() time.Time {
+	return time.Now()
+}
+
+var clock = RealClock{}
 
 type operation func() error
 
@@ -37,11 +51,12 @@ func NewCircuitBreaker() *CircuitBreaker {
 		timeout:       DefaultTimeout,
 		startOpenTime: time.Now(),
 		rate:          DefaultRate,
+		Clock:         clock,
 	}
 }
 
 func (cb *CircuitBreaker) isTimeout() bool {
-	return cb.timeout < time.Now().Sub(cb.startOpenTime)
+	return cb.timeout < cb.Clock.Now().Sub(cb.startOpenTime)
 }
 
 func (cb *CircuitBreaker) HalfOpen() {
